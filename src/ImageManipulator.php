@@ -5,7 +5,6 @@ namespace Plank\Mediable;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Support\Collection;
-use Intervention\Image\Commands\StreamCommand;
 use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 use Plank\Mediable\Exceptions\ImageManipulationException;
@@ -13,7 +12,6 @@ use Plank\Mediable\Exceptions\MediaUpload\ConfigurationException;
 use Plank\Mediable\SourceAdapters\SourceAdapterInterface;
 use Plank\Mediable\SourceAdapters\StreamAdapter;
 use Psr\Http\Message\StreamInterface;
-use Spatie\ImageOptimizer\OptimizerChain;
 
 class ImageManipulator
 {
@@ -29,7 +27,7 @@ class ImageManipulator
     /**
      * @var FilesystemManager
      */
-    private $filesystem;
+    private FilesystemManager $filesystem;
 
     private ImageOptimizer $imageOptimizer;
 
@@ -43,11 +41,15 @@ class ImageManipulator
         $this->imageOptimizer = $imageOptimizer;
     }
 
+    /**
+     * @throws ConfigurationException
+     */
     public function defineVariant(
         string $variantName,
         ImageManipulation $manipulation,
         ?array $tags = []
-    ) {
+    ): void
+    {
         if (!$this->imageManager) {
             throw ConfigurationException::interventionImageNotConfigured();
         }
@@ -102,7 +104,7 @@ class ImageManipulator
      * @param string $variantName
      * @param bool $forceRecreate
      * @return Media
-     * @throws ImageManipulationException
+     * @throws ImageManipulationException|ConfigurationException
      */
     public function createImageVariant(
         Media $media,
@@ -141,7 +143,7 @@ class ImageManipulator
             // Intervention Image  >=3.0
             $image = $this->imageManager->read($media->contents());
         } else {
-            // Intervention Image <3.0
+            /** @phpstan-ignore-next-line */
             $image = $this->imageManager->make($media->contents());
         }
 
@@ -234,7 +236,7 @@ class ImageManipulator
             // Intervention Image  >=3.0
             $image = $this->imageManager->read($source->getStream()->getContents());
         } else {
-            // Intervention Image <3.0
+            /** @phpstan-ignore-next-line */
             $image = $this->imageManager->make($source->getStream()->getContents());
         }
 
@@ -346,7 +348,8 @@ class ImageManipulator
         Media $variant,
         ImageManipulation $manipulation,
         ?Media $originalVariant = null
-    ) {
+    ): void
+    {
         if ($originalVariant
             && $variant->disk === $originalVariant->disk
             && $variant->getDiskPath() === $originalVariant->getDiskPath()
@@ -392,6 +395,9 @@ class ImageManipulator
         return $filename;
     }
 
+    /**
+     * @throws ImageManipulationException
+     */
     private function imageToStream(
         Image $image,
         string $outputFormat,

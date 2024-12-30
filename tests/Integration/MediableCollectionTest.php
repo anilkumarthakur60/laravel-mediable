@@ -22,6 +22,9 @@ class MediableCollectionTest extends TestCase
         $media = factory(Media::class)->create();
         $mediable->attachMedia($media, 'foo');
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMedia());
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -37,6 +40,9 @@ class MediableCollectionTest extends TestCase
         $mediable->attachMedia($media1, 'foo');
         $mediable->attachMedia($media2, 'bar');
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $return = $collection->loadMedia(['bar']);
 
@@ -55,6 +61,9 @@ class MediableCollectionTest extends TestCase
         $mediable->attachMedia($media1, 'foo');
         $mediable->attachMedia($media2, ['foo', 'bar', 'baz']);
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMedia(['foo', 'bar'], true));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -62,6 +71,9 @@ class MediableCollectionTest extends TestCase
         $this->assertFalse($collection[0]->media[0]->relationLoaded('originalMedia'));
         $this->assertFalse($collection[0]->media[0]->relationLoaded('variants'));
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMediaMatchAll(['foo', 'bar']));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -76,12 +88,18 @@ class MediableCollectionTest extends TestCase
         $media = factory(Media::class)->create();
         $mediable->attachMedia($media, 'foo');
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMedia([], false, true));
         $this->assertTrue($collection[0]->relationLoaded('media'));
         $this->assertTrue($collection[0]->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($collection[0]->media[0]->relationLoaded('variants'));
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMediaWithVariants([]));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -97,6 +115,9 @@ class MediableCollectionTest extends TestCase
         $mediable->attachMedia($media1, 'foo');
         $mediable->attachMedia($media2, 'bar');
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMedia(['bar'], false, true));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -104,6 +125,9 @@ class MediableCollectionTest extends TestCase
         $this->assertTrue($collection[0]->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($collection[0]->media[0]->relationLoaded('variants'));
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMediaWithVariants(['bar']));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -119,6 +143,9 @@ class MediableCollectionTest extends TestCase
         $mediable->attachMedia($media1, 'foo');
         $mediable->attachMedia($media2, ['foo', 'bar', 'baz']);
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMedia(['foo', 'bar'], true, true));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -126,6 +153,9 @@ class MediableCollectionTest extends TestCase
         $this->assertTrue($collection[0]->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($collection[0]->media[0]->relationLoaded('variants'));
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMediaWithVariants(['foo', 'bar'], true));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -133,6 +163,9 @@ class MediableCollectionTest extends TestCase
         $this->assertTrue($collection[0]->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($collection[0]->media[0]->relationLoaded('variants'));
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMediaMatchAll(['foo', 'bar'], true));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -140,6 +173,9 @@ class MediableCollectionTest extends TestCase
         $this->assertTrue($collection[0]->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($collection[0]->media[0]->relationLoaded('variants'));
 
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([SampleMediable::first()]);
         $this->assertSame($collection, $collection->loadMediaWithVariantsMatchAll(['foo', 'bar']));
         $this->assertTrue($collection[0]->relationLoaded('media'));
@@ -159,6 +195,10 @@ class MediableCollectionTest extends TestCase
         $mediable1->attachMedia($media2, ['foo', 'bar', 'baz']);
         $mediable2->attachMedia($media2, ['foo']);
         $mediable3->attachMedia($media2, ['foo']);
+
+        /**
+         * @var MediableCollection<int, SampleMediable> $collection
+         */
         $collection = new MediableCollection([$mediable1, $mediable2]);
 
         $collection->delete();

@@ -308,10 +308,11 @@ class MediableTest extends TestCase
         $media = factory(Media::class)->create();
         $mediable->attachMedia($media, 'foo');
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMedia()->first();
         $this->assertTrue($result->relationLoaded('media'));
-        $this->assertFalse($result->media[0]->relationLoaded('originalMedia'));
-        $this->assertFalse($result->media[0]->relationLoaded('variants'));
+        $this->assertFalse($result->media->first()->relationLoaded('originalMedia'));
+        $this->assertFalse($result->media->first()->relationLoaded('variants'));
     }
 
     public function test_it_can_eager_load_media_by_tag(): void
@@ -322,6 +323,7 @@ class MediableTest extends TestCase
         $mediable->attachMedia($media1, 'foo');
         $mediable->attachMedia($media2, 'bar');
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMedia(['bar'])->first();
 
         $this->assertTrue($result->relationLoaded('media'));
@@ -338,12 +340,14 @@ class MediableTest extends TestCase
         $mediable->attachMedia($media1, 'foo');
         $mediable->attachMedia($media2, ['bar', 'foo', 'baz']);
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMedia(['bar', 'foo'], true)->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertEquals([2, 2], $result->media->pluck('id')->toArray());
         $this->assertFalse($result->media[0]->relationLoaded('originalMedia'));
         $this->assertFalse($result->media[0]->relationLoaded('variants'));
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMediaMatchAll(['bar', 'foo'])->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertEquals([2, 2], $result->media->pluck('id')->toArray());
@@ -357,11 +361,13 @@ class MediableTest extends TestCase
         $media = factory(Media::class)->create();
         $mediable->attachMedia($media, 'foo');
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMedia([], false, true)->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertTrue($result->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($result->media[0]->relationLoaded('variants'));
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMediaAndVariants()->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertTrue($result->media[0]->relationLoaded('originalMedia'));
@@ -376,12 +382,14 @@ class MediableTest extends TestCase
         $mediable->attachMedia($media1, 'foo');
         $mediable->attachMedia($media2, 'bar');
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMedia(['bar'], false, true)->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertEquals([2], $result->media->pluck('id')->toArray());
         $this->assertTrue($result->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($result->media[0]->relationLoaded('variants'));
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMediaAndVariants(['bar'])->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertEquals([2], $result->media->pluck('id')->toArray());
@@ -397,24 +405,28 @@ class MediableTest extends TestCase
         $mediable->attachMedia($media1, 'foo');
         $mediable->attachMedia($media2, ['bar', 'foo', 'baz']);
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMedia(['bar', 'foo'], true, true)->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertEquals([2, 2], $result->media->pluck('id')->toArray());
         $this->assertTrue($result->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($result->media[0]->relationLoaded('variants'));
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMediaAndVariants(['bar', 'foo'], true)->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertEquals([2, 2], $result->media->pluck('id')->toArray());
         $this->assertTrue($result->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($result->media[0]->relationLoaded('variants'));
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMediaMatchAll(['bar', 'foo'], true)->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertEquals([2, 2], $result->media->pluck('id')->toArray());
         $this->assertTrue($result->media[0]->relationLoaded('originalMedia'));
         $this->assertTrue($result->media[0]->relationLoaded('variants'));
 
+        /** @var SampleMediable $result */
         $result = SampleMediable::withMediaAndVariantsMatchAll(['bar', 'foo'])->first();
         $this->assertTrue($result->relationLoaded('media'));
         $this->assertEquals([2, 2], $result->media->pluck('id')->toArray());

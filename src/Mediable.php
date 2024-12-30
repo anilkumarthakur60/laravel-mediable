@@ -216,13 +216,13 @@ trait Mediable
      * @param string|string[] $tags If one or more tags are specified, only media attached to those tags will be loaded.
      * @param bool $matchAll Only load media matching all provided tags
      * @param bool $withVariants If true, also load the variants and/or originalMedia relation of each Media
-     * @return Mediable|SampleMediable|SampleMediableSoftDelete
+     * @return static
      */
     public function loadMedia(
         array|string $tags = [],
         bool         $matchAll = false,
         bool         $withVariants = false
-    ): self
+    ): static
     {
         $tags = (array)$tags;
 
@@ -262,9 +262,9 @@ trait Mediable
     /** Lazy eager load attached media, as well as their variants.
      * @param array|string $tags
      * @param bool $matchAll
-     * @return $this
+     * @return static
      */
-    public function loadMediaWithVariants(array|string $tags = [], bool $matchAll = false): self
+    public function loadMediaWithVariants(array|string $tags = [], bool $matchAll = false): static
     {
         return $this->loadMedia($tags, $matchAll, true);
     }
@@ -273,9 +273,9 @@ trait Mediable
      * Lazy eager load attached media relationships matching all provided tags.
      * @param string|string[] $tags one or more tags
      * @param bool $withVariants If true, also load the variants and/or originalMedia relation of each Media
-     * @return Mediable|SampleMediable|SampleMediableSoftDelete
+     * @return static
      */
-    public function loadMediaMatchAll(array|string $tags = [], bool $withVariants = false): self
+    public function loadMediaMatchAll(array|string $tags = [], bool $withVariants = false): static
     {
         return $this->loadMedia($tags, true, $withVariants);
     }
@@ -284,9 +284,9 @@ trait Mediable
      * Lazy eager load attached media relationships matching all provided tags, as well
      * as the variants of those media.
      * @param array|string $tags
-     * @return $this
+     * @return static
      */
-    public function loadMediaWithVariantsMatchAll(array|string $tags = []): self
+    public function loadMediaWithVariantsMatchAll(array|string $tags = []): static
     {
         return $this->loadMedia($tags, true, true);
     }
@@ -378,10 +378,10 @@ trait Mediable
     /**
      * Retrieve media attached to the model.
      * @param string|string[] $tags
-     * @param  bool $matchAll
+     * @param bool $matchAll
      * If false, will return media attached to any of the provided tags
      * If true, will return media attached to all of the provided tags simultaneously
-     * @return Collection|Media[]
+     * @return Collection
      */
     public function getMedia(array|string $tags, bool $matchAll = false): Collection
     {
@@ -450,7 +450,7 @@ trait Mediable
 
     /**
      * Retrieve all media grouped by tag name.
-     * @return Collection|Media[]
+     * @return Collection
      */
     public function getAllMediaByTag(): Collection
     {
@@ -614,7 +614,7 @@ trait Mediable
      * @param  mixed $input
      * @return int[]|string[]
      */
-    private function extractPrimaryIds($input): array
+    private function extractPrimaryIds(mixed $input): array
     {
         if ($input instanceof Collection) {
             return $input->modelKeys();

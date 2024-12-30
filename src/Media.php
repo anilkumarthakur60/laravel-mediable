@@ -230,12 +230,13 @@ class Media extends Model
     }
 
     /**
-     * Query scope for to find media in a particular directory.
-     * @param  Builder<Model> $builder
-     * @param  string $disk Filesystem disk to search in
-     * @param  string $directory Path relative to disk
-     * @param  bool $recursive (_optional_) If true, will find media in or under the specified directory
-     * @return Builder<Media>
+     * Query scope to find media in a particular directory.
+     *
+     * @param  Builder $builder The query builder instance.
+     * @param  string $disk The filesystem disk to search in.
+     * @param  string $directory The path relative to the disk.
+     * @param  bool $recursive Optional. If true, will find media in or under the specified directory.
+     * @return Builder The query builder instance with the applied scope.
      */
     public function scopeInDirectory(Builder $builder, string $disk, string $directory, bool $recursive = false): Builder
     {
@@ -461,11 +462,11 @@ class Media extends Model
     }
 
     /**
-     * @param Media|string|int $media
+     * @param int|string|Media $media
      * @param string $variantName
      * @return $this
      */
-    public function makeVariantOf($media, string $variantName): self
+    public function makeVariantOf(int|string|Media $media, string $variantName): self
     {
         if (!$media instanceof self) {
             $media = $this->newQuery()->findOrFail($media);

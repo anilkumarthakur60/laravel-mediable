@@ -83,20 +83,20 @@ interface MediableInterface
     /**
      * @param string|string[] $tags
      * @param bool $matchAll
-     * @return self
+     * @return $this
      */
     public function loadMediaWithVariants(array|string $tags = [], bool $matchAll = false): self;
 
     /**
      * @param string|string[] $tags
      * @param bool $withVariants
-     * @return self
+     * @return $this
      */
     public function loadMediaMatchAll(array|string $tags = [], bool $withVariants = false): self;
 
     /**
      * @param string|string[] $tags
-     * @return self
+     * @return $this
      */
     public function loadMediaWithVariantsMatchAll(array|string $tags = []): self;
 

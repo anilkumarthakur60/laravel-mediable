@@ -27,9 +27,9 @@ class MediableCollection extends Collection
      * @return $this
      */
     public function loadMedia(
-        $tags = [],
-        bool $matchAll = false,
-        bool $withVariants = false
+        array|string $tags = [],
+        bool         $matchAll = false,
+        bool         $withVariants = false
     ): self {
         if ($this->isEmpty()) {
             return $this;
@@ -81,20 +81,20 @@ class MediableCollection extends Collection
      * @param bool $matchAll If true, only load media attached to all tags simultaneously
      * @return $this
      */
-    public function loadMediaWithVariants($tags = [], bool $matchAll = false): self
+    public function loadMediaWithVariants(array|string $tags = [], bool $matchAll = false): self
     {
         return $this->loadMedia($tags, $matchAll, true);
     }
 
     /**
-     * Lazy eager load media attached to items in the collection bound all of the provided
+     * Lazy eager load media attached to items in the collection bound all the provided
      * tags simultaneously.
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * @param bool $withVariants If true, also load the variants and/or originalMedia relation of each Media
      * If one or more tags are specified, only media attached to all of those tags will be loaded.
      * @return $this
      */
-    public function loadMediaMatchAll($tags = [], bool $withVariants = false): self
+    public function loadMediaMatchAll(array|string $tags = [], bool $withVariants = false): self
     {
         return $this->loadMedia($tags, true, $withVariants);
     }
@@ -102,11 +102,11 @@ class MediableCollection extends Collection
     /**
      * Lazy eager load media attached to items in the collection bound all of the provided
      * tags simultaneously, as well as the variants of those media.
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * If one or more tags are specified, only media attached to all of those tags will be loaded.
      * @return $this
      */
-    public function loadMediaWithVariantsMatchAll($tags = []): self
+    public function loadMediaWithVariantsMatchAll(array|string $tags = []): self
     {
         return $this->loadMedia($tags, true, true);
     }
