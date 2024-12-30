@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Plank\Mediable\Tests\Mocks\SampleMediable;
+use Plank\Mediable\Tests\Mocks\SampleMediableSoftDelete;
 
 /**
  * Mediable Trait.
@@ -17,12 +19,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
  *
  * @property MediableCollection $media
  * @property Pivot $pivot
- * @method static Builder withMedia($tags = [], bool $matchAll = false, bool $withVariants = false)
- * @method static Builder withMediaAndVariants($tags = [], bool $matchAll = false)
- * @method static Builder withMediaMatchAll($tags = [], bool $withVariants = false)
- * @method static Builder withMediaAndVariantsMatchAll($tags = [])
- * @method static Builder whereHasMedia($tags = [], bool $matchAll = false)
- * @method static Builder whereHasMediaMatchAll($tags)
+ * @method static Builder<Media> withMedia($tags = [], bool $matchAll = false, bool $withVariants = false)
+ * @method static Builder<Media> withMediaAndVariants($tags = [], bool $matchAll = false)
+ * @method static Builder<Media> withMediaMatchAll($tags = [], bool $withVariants = false)
+ * @method static Builder<Media> withMediaAndVariantsMatchAll($tags = [])
+ * @method static Builder<Media> whereHasMedia($tags = [], bool $matchAll = false)
+ * @method static Builder<Media> whereHasMediaMatchAll($tags)
  *
  */
 trait Mediable
@@ -65,37 +67,39 @@ trait Mediable
 
     /**
      * Query scope to detect the presence of one or more attached media for a given tag.
-     * @param  Builder $q
-     * @param  string|string[] $tags
-     * @param  bool $matchAll
-     * @return void
+     * @param Builder $builder
+     * @param string|string[] $tags
+     * @param bool $matchAll
+     * @return Builder
      */
-    public function scopeWhereHasMedia(Builder $q, $tags = [], bool $matchAll = false): void
+    public function scopeWhereHasMedia(Builder $builder, array|string $tags = [], bool $matchAll = false): Builder
     {
         $tags = (array)$tags;
         if ($matchAll && count($tags) > 1) {
-            $grammar = $q->getQuery()->getGrammar();
+            $grammar = $builder->getQuery()->getGrammar();
             $subquery = $this->newMatchAllQuery($tags)
                 ->selectRaw('count(*)')
                 ->whereRaw(
                     $grammar->wrap($this->media()->getQualifiedForeignPivotKeyName())
                     . ' = ' . $grammar->wrap($this->getQualifiedKeyName())
                 );
-            $q->whereRaw('(' . $subquery->toSql() . ') >= 1', $subquery->getBindings());
+            $builder->whereRaw('(' . $subquery->toSql() . ') >= 1', $subquery->getBindings());
 
-            return;
+            return $builder;
         }
 
-        $q->whereHas('media', function (Builder $q) use ($tags) {
+        $builder->whereHas('media', function (Builder $q) use ($tags) {
             if (count($tags) > 0) {
                 $q->whereIn('tag', $tags);
             }
         });
+
+        return $builder;
     }
 
     /**
      * Query scope to detect the presence of one or more attached media that is bound to
-     * all of the specified tags simultaneously.
+     * all the specified tags simultaneously.
      * @param  Builder $q
      * @param  string|string[] $tags
      * @return void
@@ -108,35 +112,35 @@ trait Mediable
     /**
      * Query scope to eager load attached media.
      *
-     * @param Builder $q
+     * @param Builder $builder
      * @param string|string[] $tags If one or more tags are specified, only media attached to those tags will be loaded.
      * @param bool $matchAll Only load media matching all provided tags
      * @param bool $withVariants If true, also load the variants and/or originalMedia relation of each Media
-     * @return void
+     * @return Builder
      */
     public function scopeWithMedia(
-        Builder $q,
-        $tags = [],
-        bool $matchAll = false,
-        bool $withVariants = false
-    ): void {
+        Builder      $builder,
+        array|string $tags = [],
+        bool         $matchAll = false,
+        bool         $withVariants = false
+    ): Builder {
         $tags = (array)$tags;
 
         if (empty($tags)) {
             if ($withVariants) {
-                $q->with(
+                $builder->with(
                     'media.variants',
                     'media.originalMedia.variants'
                 );
             } else {
-                $q->with('media');
+                $builder->with('media');
             }
 
-            return;
+            return $builder;
         }
 
         if ($matchAll) {
-            $q->with(
+            $builder->with(
                 [
                     'media' => function (MorphToMany $q) use ($tags, $withVariants) {
                         $this->addMatchAllToEagerLoadQuery($q, $tags);
@@ -146,10 +150,10 @@ trait Mediable
                     }
                 ]
             );
-            return;
+            return $builder;
         }
 
-        $q->with(
+        $builder->with(
             [
                 'media' => function (MorphToMany $q) use ($tags, $withVariants) {
                     $q->wherePivotIn('tag', $tags);
@@ -160,47 +164,51 @@ trait Mediable
                 }
             ]
         );
+        return  $builder;
     }
 
     /**
      * Query scope to eager load attached media, as well as their variants
      * of those media.
-     * @param Builder $q
-     * @param array $tags
+     * @param Builder $builder
+     * @param array|string $tags
      * @param bool $matchAll
+     * @return Builder
      */
     public function scopeWithMediaAndVariants(
-        Builder $q,
-        $tags = [],
-        bool $matchAll = false
-    ) {
-        $this->scopeWithMedia($q, $tags, $matchAll, true);
+        Builder      $builder,
+        array|string $tags = [],
+        bool         $matchAll = false
+    ):Builder
+    {
+       return $this->scopeWithMedia($builder, $tags, $matchAll, true);
     }
 
     /**
      * Query scope to eager load attached media assigned to multiple tags.
-     * @param  Builder $q
-     * @param  string|string[] $tags
+     * @param  Builder $builder
+     * @param string|string[] $tags
      * @param bool $withVariants If true, also load the variants and/or originalMedia relation of each Media
-     * @return void
+     * @return Builder
      */
     public function scopeWithMediaMatchAll(
-        Builder $q,
-        $tags = [],
-        bool $withVariants = false
-    ): void {
+        Builder      $builder,
+        array|string $tags = [],
+        bool         $withVariants = false
+    ): Builder {
         $tags = (array)$tags;
-        $this->scopeWithMedia($q, $tags, true, $withVariants);
+        return $this->scopeWithMedia($builder, $tags, true, $withVariants);
     }
 
     /**
      * Query scope to eager load attached media assigned to multiple tags, as well as the variants of those media.
-     * @param Builder $q
-     * @param array $tags
+     * @param Builder $builder
+     * @param array|string $tags
+     * @return Builder
      */
-    public function scopeWithMediaAndVariantsMatchAll(Builder $q, $tags = []): void
+    public function scopeWithMediaAndVariantsMatchAll(Builder $builder, array|string $tags = []): Builder
     {
-        $this->scopeWithMedia($q, $tags, true, true);
+        return $this->scopeWithMedia($builder, $tags, true, true);
     }
 
     /**
@@ -208,13 +216,14 @@ trait Mediable
      * @param string|string[] $tags If one or more tags are specified, only media attached to those tags will be loaded.
      * @param bool $matchAll Only load media matching all provided tags
      * @param bool $withVariants If true, also load the variants and/or originalMedia relation of each Media
-     * @return $this
+     * @return Mediable|SampleMediable|SampleMediableSoftDelete
      */
     public function loadMedia(
-        $tags = [],
-        bool $matchAll = false,
-        bool $withVariants = false
-    ): self {
+        array|string $tags = [],
+        bool         $matchAll = false,
+        bool         $withVariants = false
+    ): self
+    {
         $tags = (array)$tags;
 
         if (empty($tags)) {
@@ -251,22 +260,22 @@ trait Mediable
     }
 
     /** Lazy eager load attached media, as well as their variants.
-     * @param array $tags
+     * @param array|string $tags
      * @param bool $matchAll
      * @return $this
      */
-    public function loadMediaWithVariants($tags = [], bool $matchAll = false): self
+    public function loadMediaWithVariants(array|string $tags = [], bool $matchAll = false): self
     {
         return $this->loadMedia($tags, $matchAll, true);
     }
 
     /**
      * Lazy eager load attached media relationships matching all provided tags.
-     * @param  string|string[] $tags one or more tags
+     * @param string|string[] $tags one or more tags
      * @param bool $withVariants If true, also load the variants and/or originalMedia relation of each Media
-     * @return $this
+     * @return Mediable|SampleMediable|SampleMediableSoftDelete
      */
-    public function loadMediaMatchAll($tags = [], bool $withVariants = false): self
+    public function loadMediaMatchAll(array|string $tags = [], bool $withVariants = false): self
     {
         return $this->loadMedia($tags, true, $withVariants);
     }
@@ -274,21 +283,21 @@ trait Mediable
     /**
      * Lazy eager load attached media relationships matching all provided tags, as well
      * as the variants of those media.
-     * @param array $tags
+     * @param array|string $tags
      * @return $this
      */
-    public function loadMediaWithVariantsMatchAll($tags = []): self
+    public function loadMediaWithVariantsMatchAll(array|string $tags = []): self
     {
         return $this->loadMedia($tags, true, true);
     }
 
     /**
      * Attach a media entity to the model with one or more tags.
-     * @param string|int|int[]|Media|Collection $media Either a string or numeric id, an array of ids, an instance of `Media` or an instance of `Collection`
+     * @param int|string|Collection|int[]|Media $media Either a string or numeric id, an array of ids, an instance of `Media` or an instance of `Collection`
      * @param string|string[] $tags One or more tags to define the relation
      * @return void
      */
-    public function attachMedia($media, $tags): void
+    public function attachMedia(array|Collection|int|string|Media $media, array|string $tags): void
     {
         $tags = (array)$tags;
         $increments = $this->getOrderValueForTags($tags);
@@ -311,11 +320,11 @@ trait Mediable
 
     /**
      * Replace the existing media collection for the specified tag(s).
-     * @param string|int|int[]|Media|Collection $media
+     * @param int|string|Collection|int[]|Media $media
      * @param string|string[] $tags
      * @return void
      */
-    public function syncMedia($media, $tags): void
+    public function syncMedia(array|Collection|int|string|Media $media, array|string $tags): void
     {
         $this->detachMediaTags($tags);
         $this->attachMedia($media, $tags);
@@ -323,13 +332,13 @@ trait Mediable
 
     /**
      * Detach a media item from the model.
-     * @param  string|int|Media|Collection $media
-     * @param  string|string[]|null $tags
+     * @param array|int|string|Collection|Media $media
+     * @param string|string[]|null $tags
      * If provided, will remove the media from the model for the provided tag(s) only
      * If omitted, will remove the media from the media for all tags
      * @return void
      */
-    public function detachMedia($media, $tags = null): void
+    public function detachMedia(array|Collection|int|string|Media $media, array|string $tags = null): void
     {
         $query = $this->media();
         if ($tags) {
@@ -341,10 +350,10 @@ trait Mediable
 
     /**
      * Remove one or more tags from the model, detaching any media using those tags.
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * @return void
      */
-    public function detachMediaTags($tags): void
+    public function detachMediaTags(array|string $tags): void
     {
         $this->media()->newPivotStatement()
             ->where($this->media()->getMorphType(), $this->media()->getMorphClass())
@@ -355,26 +364,26 @@ trait Mediable
 
     /**
      * Check if the model has any media attached to one or more tags.
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * @param  bool $matchAll
      * If false, will return true if the model has any attach media for any of the provided tags
      * If true, will return true is the model has any media that are attached to all of provided tags simultaneously
      * @return bool
      */
-    public function hasMedia($tags, bool $matchAll = false): bool
+    public function hasMedia(array|string $tags, bool $matchAll = false): bool
     {
         return count($this->getMedia($tags, $matchAll)) > 0;
     }
 
     /**
      * Retrieve media attached to the model.
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * @param  bool $matchAll
      * If false, will return media attached to any of the provided tags
      * If true, will return media attached to all of the provided tags simultaneously
      * @return Collection|Media[]
      */
-    public function getMedia($tags, bool $matchAll = false): Collection
+    public function getMedia(array|string $tags, bool $matchAll = false): Collection
     {
         if ($matchAll) {
             return $this->getMediaMatchAll($tags);
@@ -394,7 +403,7 @@ trait Mediable
     /**
      * Retrieve media attached to multiple tags simultaneously.
      * @param string[] $tags
-     * @return Collection|Media[]
+     * @return Collection
      */
     public function getMediaMatchAll(array $tags): Collection
     {
@@ -417,24 +426,24 @@ trait Mediable
 
     /**
      * Shorthand for retrieving the first attached media item.
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * @param  bool $matchAll
-     * @see \Plank\Mediable\Mediable::getMedia()
      * @return Media|null
+     *@see \Plank\Mediable\Mediable::getMedia()
      */
-    public function firstMedia($tags, bool $matchAll = false): ?Media
+    public function firstMedia(array|string $tags, bool $matchAll = false): ?Media
     {
         return $this->getMedia($tags, $matchAll)->first();
     }
 
     /**
      * Shorthand for retrieving the last attached media item.
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * @param  bool $matchAll
-     * @see \Plank\Mediable\Mediable::getMedia()
      * @return Media|null
+     *@see \Plank\Mediable\Mediable::getMedia()
      */
-    public function lastMedia($tags, bool $matchAll = false): ?Media
+    public function lastMedia(array|string $tags, bool $matchAll = false): ?Media
     {
         return $this->getMedia($tags, $matchAll)->last();
     }
@@ -524,10 +533,10 @@ trait Mediable
 
     /**
      * Generate a query builder for.
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * @return \Illuminate\Database\Query\Builder
      */
-    protected function newMatchAllQuery($tags = []): \Illuminate\Database\Query\Builder
+    protected function newMatchAllQuery(array|string $tags = []): \Illuminate\Database\Query\Builder
     {
         $tags = (array)$tags;
         $grammar = $this->media()->getBaseQuery()->getGrammar();
@@ -597,8 +606,7 @@ trait Mediable
 
         $empty = array_combine($tags, array_fill(0, count($tags), 0));
 
-        $merged = collect($result)->toArray() + $empty;
-        return $merged;
+        return collect($result)->toArray() + $empty;
     }
 
     /**
@@ -641,7 +649,7 @@ trait Mediable
      * {@inheritdoc}
      * @return MediableCollection
      */
-    public function newCollection(array $models = [])
+    public function newCollection(array $models = []): MediableCollection
     {
         return new MediableCollection($models);
     }

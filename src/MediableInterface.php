@@ -23,13 +23,13 @@ interface MediableInterface
      * @param Builder $q
      * @param string|string[] $tags
      * @param bool $matchAll
-     * @return void
+     * @return Builder
      */
     public function scopeWhereHasMedia(
-        Builder $q,
-        $tags = [],
-        bool $matchAll = false
-    ): void;
+        Builder      $q,
+        array|string $tags = [],
+        bool         $matchAll = false
+    ): Builder;
 
     public function scopeWhereHasMediaMatchAll(Builder $q, array $tags): void;
 
@@ -38,45 +38,45 @@ interface MediableInterface
      * @param string|string[] $tags
      * @param bool $matchAll
      * @param bool $withVariants
-     * @return mixed
+     * @return Builder
      */
     public function scopeWithMedia(
-        Builder $q,
-        $tags = [],
-        bool $matchAll = false,
-        bool $withVariants = false
-    );
+        Builder      $q,
+        array|string $tags = [],
+        bool         $matchAll = false,
+        bool         $withVariants = false
+    ):Builder;
 
     /**
      * @param Builder $q
      * @param string|string[] $tags
      * @param bool $matchAll
-     * @return mixed
+     * @return Builder
      */
     public function scopeWithMediaAndVariants(
-        Builder $q,
-        $tags = [],
-        bool $matchAll = false
-    );
-
-    /**
-     * @param Builder $q
-     * @param string|string[]$tags
-     * @param bool $withVariants
-     * @return mixed
-     */
-    public function scopeWithMediaMatchAll(
-        Builder $q,
-        $tags = [],
-        bool $withVariants = false
-    );
+        Builder      $q,
+        array|string $tags = [],
+        bool         $matchAll = false
+    ):Builder;
 
     /**
      * @param Builder $q
      * @param string|string[] $tags
-     * @return void
+     * @param bool $withVariants
+     * @return Builder
      */
-    public function scopeWithMediaAndVariantsMatchAll(Builder $q, $tags = []): void;
+    public function scopeWithMediaMatchAll(
+        Builder      $q,
+        array|string $tags = [],
+        bool         $withVariants = false
+    ):Builder;
+
+    /**
+     * @param Builder $q
+     * @param string|string[] $tags
+     * @return Builder
+     */
+    public function scopeWithMediaAndVariantsMatchAll(Builder $q, array|string $tags = []): Builder;
 
     public function loadMedia();
 
@@ -85,61 +85,61 @@ interface MediableInterface
      * @param bool $matchAll
      * @return self
      */
-    public function loadMediaWithVariants($tags = [], bool $matchAll = false): self;
+    public function loadMediaWithVariants(array|string $tags = [], bool $matchAll = false): self;
 
     /**
      * @param string|string[] $tags
      * @param bool $withVariants
      * @return self
      */
-    public function loadMediaMatchAll($tags = [], bool $withVariants = false): self;
+    public function loadMediaMatchAll(array|string $tags = [], bool $withVariants = false): self;
 
     /**
      * @param string|string[] $tags
      * @return self
      */
-    public function loadMediaWithVariantsMatchAll($tags = []): self;
+    public function loadMediaWithVariantsMatchAll(array|string $tags = []): self;
 
     /**
-     * @param string|int|int[]|Media|Collection $media
+     * @param int|string|Collection|int[]|Media $media
      * @param string|string[] $tags
      * @return void
      */
-    public function attachMedia($media, $tags): void;
+    public function attachMedia(array|Collection|int|string|Media $media, array|string $tags): void;
 
     /**
-     * @param string|int|int[]|Media|Collection $media
+     * @param int|string|Collection|int[]|Media $media
      * @param string|string[] $tags
      * @return void
      */
-    public function syncMedia($media, $tags): void;
+    public function syncMedia(array|Collection|int|string|Media $media, array|string $tags): void;
 
     /**
-     * @param string|int|int[]|Media|Collection $media
+     * @param int|string|Collection|int[]|Media $media
+     * @param string|string[]|null $tags
+     * @return void
+     */
+    public function detachMedia(array|Collection|int|string|Media $media, array|string|null $tags = null): void;
+
+    /**
      * @param string|string[] $tags
      * @return void
      */
-    public function detachMedia($media, $tags = null): void;
-
-    /**
-     * @param string|string[] $tags
-     * @return void
-     */
-    public function detachMediaTags($tags): void;
+    public function detachMediaTags(array|string $tags): void;
 
     /**
      * @param string|string[] $tags
      * @param bool $matchAll
      * @return bool
      */
-    public function hasMedia($tags, bool $matchAll = false): bool;
+    public function hasMedia(array|string $tags, bool $matchAll = false): bool;
 
     /**
      * @param string|string[] $tags
      * @param bool $matchAll
      * @return Collection
      */
-    public function getMedia($tags, bool $matchAll = false): Collection;
+    public function getMedia(array|string $tags, bool $matchAll = false): Collection;
 
     public function getMediaMatchAll(array $tags): Collection;
 
@@ -148,14 +148,14 @@ interface MediableInterface
      * @param bool $matchAll
      * @return Media|null
      */
-    public function firstMedia($tags, bool $matchAll = false): ?Media;
+    public function firstMedia(array|string $tags, bool $matchAll = false): ?Media;
 
     /**
      * @param string|string[] $tags
      * @param bool $matchAll
      * @return Media|null
      */
-    public function lastMedia($tags, bool $matchAll = false): ?Media;
+    public function lastMedia(array|string $tags, bool $matchAll = false): ?Media;
 
     public function getAllMediaByTag(): Collection;
 
@@ -171,5 +171,5 @@ interface MediableInterface
      * @param array $models
      * @return MediableCollection
      */
-    public function newCollection(array $models = []);
+    public function newCollection(array $models = []): MediableCollection;
 }
