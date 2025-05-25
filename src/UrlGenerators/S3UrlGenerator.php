@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Plank\Mediable\UrlGenerators;
@@ -14,7 +15,8 @@ class S3UrlGenerator extends BaseUrlGenerator implements TemporaryUrlGeneratorIn
 
     /**
      * Constructor.
-     * @param Config $config
+     *
+     * @param Config            $config
      * @param FilesystemManager $filesystem
      */
     public function __construct(Config $config, FilesystemManager $filesystem)
@@ -38,6 +40,7 @@ class S3UrlGenerator extends BaseUrlGenerator implements TemporaryUrlGeneratorIn
     {
         /** @var Cloud $filesystem */
         $filesystem = $this->filesystem->disk($this->media->disk);
+
         return $filesystem->url($this->media->getDiskPath());
     }
 
@@ -45,6 +48,7 @@ class S3UrlGenerator extends BaseUrlGenerator implements TemporaryUrlGeneratorIn
     {
         /** @var FilesystemAdapter $filesystem */
         $filesystem = $this->filesystem->disk($this->media->disk);
+
         return $filesystem->temporaryUrl($this->media->getDiskPath(), $expiry);
     }
 }

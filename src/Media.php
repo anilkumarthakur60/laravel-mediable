@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Plank\Mediable;
@@ -23,23 +24,25 @@ use Psr\Http\Message\StreamInterface;
 
 /**
  * Media Model.
- * @property int|string|null $id
- * @property string|null $disk
- * @property string|null $directory
- * @property string|null $filename
- * @property string|null $extension
- * @property string|null $basename
- * @property string|null $mime_type
- * @property string|null $aggregate_type
- * @property string|null $variant_name
- * @property int|string|null $original_media_id
- * @property int|null $size
- * @property string $alt
- * @property Carbon $created_at
- * @property Carbon $updated_at
- * @property Pivot $pivot
+ *
+ * @property int|string|null    $id
+ * @property string|null        $disk
+ * @property string|null        $directory
+ * @property string|null        $filename
+ * @property string|null        $extension
+ * @property string|null        $basename
+ * @property string|null        $mime_type
+ * @property string|null        $aggregate_type
+ * @property string|null        $variant_name
+ * @property int|string|null    $original_media_id
+ * @property int|null           $size
+ * @property string             $alt
+ * @property Carbon             $created_at
+ * @property Carbon             $updated_at
+ * @property Pivot              $pivot
  * @property Collection|Media[] $variants
- * @property Media $originalMedia
+ * @property Media              $originalMedia
+ *
  * @method static Builder<Media> inDirectory(string $disk, string $directory, bool $recursive = false)
  * @method static Builder<Media> inOrUnderDirectory(string $disk, string $directory)
  * @method static Builder<Media> whereBasename(string $basename)
@@ -85,7 +88,7 @@ class Media extends Model
     ];
 
     protected $attributes = [
-        'alt' => ''
+        'alt' => '',
     ];
 
     /**
@@ -103,7 +106,9 @@ class Media extends Model
 
     /**
      * Retrieve all associated models of given class.
-     * @param  string $class FQCN
+     *
+     * @param string $class FQCN
+     *
      * @return MorphToMany
      */
     public function models(string $class): MorphToMany
@@ -118,7 +123,8 @@ class Media extends Model
     }
 
     /**
-     * Relationship to variants derived from this file
+     * Relationship to variants derived from this file.
+     *
      * @return HasMany
      */
     public function variants(): HasMany
@@ -130,7 +136,8 @@ class Media extends Model
     }
 
     /**
-     * Relationship to the file that this file was derived from
+     * Relationship to the file that this file was derived from.
+     *
      * @return BelongsTo
      */
     public function originalMedia(): BelongsTo
@@ -142,7 +149,8 @@ class Media extends Model
     }
 
     /**
-     * Retrieve all other variants and originals of the media
+     * Retrieve all other variants and originals of the media.
+     *
      * @return Collection
      */
     public function getAllVariants(): Collection
@@ -165,6 +173,7 @@ class Media extends Model
         if ($this->isOriginal()) {
             $collection = $this->variants->keyBy('variant_name');
             $collection->offsetSet(self::VARIANT_NAME_ORIGINAL, $this);
+
             return $collection;
         }
 
@@ -212,17 +221,20 @@ class Media extends Model
 
     /**
      * Retrieve the file extension.
+     *
      * @return string
      */
     public function getBasenameAttribute(): string
     {
-        return $this->filename . '.' . $this->extension;
+        return $this->filename.'.'.$this->extension;
     }
 
     /**
      * Retrieve the file url.
-     * @return string
+     *
      * @throws MediaUrlException
+     *
+     * @return string
      */
     public function getUrlAttribute(): string
     {
@@ -232,10 +244,11 @@ class Media extends Model
     /**
      * Query scope to find media in a particular directory.
      *
-     * @param  Builder $builder The query builder instance.
-     * @param  string $disk The filesystem disk to search in.
-     * @param  string $directory The path relative to the disk.
-     * @param  bool $recursive Optional. If true, will find media in or under the specified directory.
+     * @param Builder $builder   The query builder instance.
+     * @param string  $disk      The filesystem disk to search in.
+     * @param string  $directory The path relative to the disk.
+     * @param bool    $recursive Optional. If true, will find media in or under the specified directory.
+     *
      * @return Builder The query builder instance with the applied scope.
      */
     public function scopeInDirectory(Builder $builder, string $disk, string $directory, bool $recursive = false): Builder
@@ -243,7 +256,7 @@ class Media extends Model
         return $builder->where('disk', $disk)
           ->when($recursive, function (Builder $query) use ($directory) {
               $directory = str_replace(['%', '_'], ['\%', '\_'], $directory);
-              $query->where('directory', 'like', $directory . '%');
+              $query->where('directory', 'like', $directory.'%');
           }, function (Builder $query) use ($directory) {
               $query->where('directory', '=', $directory);
           });
@@ -251,9 +264,11 @@ class Media extends Model
 
     /**
      * Query scope for finding media in a particular directory or one of its subdirectories.
-     * @param  Builder<Model> $builder
-     * @param  string $disk Filesystem disk to search in
-     * @param  string $directory Path relative to disk
+     *
+     * @param Builder<Model> $builder
+     * @param string         $disk      Filesystem disk to search in
+     * @param string         $directory Path relative to disk
+     *
      * @return Builder<Media>
      */
     public function scopeInOrUnderDirectory(Builder $builder, string $disk, string $directory): Builder
@@ -263,21 +278,25 @@ class Media extends Model
 
     /**
      * Query scope for finding media by basename.
-     * @param  Builder $builder
-     * @param  string $basename filename and extension
+     *
+     * @param Builder $builder
+     * @param string  $basename filename and extension
+     *
      * @return Builder<Media>
      */
     public function scopeWhereBasename(Builder $builder, string $basename): Builder
     {
-       return  $builder->where('filename', pathinfo($basename, PATHINFO_FILENAME))
-            ->where('extension', pathinfo($basename, PATHINFO_EXTENSION));
+        return  $builder->where('filename', pathinfo($basename, PATHINFO_FILENAME))
+             ->where('extension', pathinfo($basename, PATHINFO_EXTENSION));
     }
 
     /**
      * Query scope finding media at a path relative to a disk.
-     * @param  Builder $builder
-     * @param  string $disk
-     * @param  string $path directory, filename and extension
+     *
+     * @param Builder $builder
+     * @param string  $disk
+     * @param string  $path    directory, filename and extension
+     *
      * @return Builder<Media>
      */
     public function scopeForPathOnDisk(Builder $builder, string $disk, string $path): Builder
@@ -290,7 +309,9 @@ class Media extends Model
 
     /**
      * Query scope to remove the order by clause from the query.
-     * @param  Builder $builder
+     *
+     * @param Builder $builder
+     *
      * @return Builder<Media>
      */
     public function scopeUnordered(Builder $builder): Builder
@@ -299,6 +320,7 @@ class Media extends Model
         if ($query->orders) {
             $query->orders = null;
         }
+
         return $builder;
     }
 
@@ -313,12 +335,15 @@ class Media extends Model
         if ($variant_name) {
             $builder->where('variant_name', $variant_name);
         }
+
         return $builder;
     }
 
     /**
      * Calculate the file size in human-readable byte notation.
-     * @param  int $precision (_optional_) Number of decimal places to include.
+     *
+     * @param int $precision (_optional_) Number of decimal places to include.
+     *
      * @return string
      */
     public function readableSize(int $precision = 1): string
@@ -328,17 +353,20 @@ class Media extends Model
 
     /**
      * Get the path to the file relative to the root of the disk.
+     *
      * @return string
      */
     public function getDiskPath(): string
     {
-        return ltrim(File::joinPathComponents((string)$this->directory, (string)$this->basename), '/');
+        return ltrim(File::joinPathComponents((string) $this->directory, (string) $this->basename), '/');
     }
 
     /**
      * Get the absolute filesystem path to the file.
-     * @return string
+     *
      * @throws MediaUrlException
+     *
+     * @return string
      */
     public function getAbsolutePath(): string
     {
@@ -347,6 +375,7 @@ class Media extends Model
 
     /**
      * Check if the file is located below the public webroot.
+     *
      * @return bool
      */
     public function isPubliclyAccessible(): bool
@@ -356,7 +385,9 @@ class Media extends Model
 
     /**
      * Get the absolute URL to the media file.
+     *
      * @throws MediaUrlException If media's disk is not publicly accessible
+     *
      * @return string
      */
     public function getUrl(): string
@@ -379,6 +410,7 @@ class Media extends Model
 
     /**
      * Check if the file exists on disk.
+     *
      * @return bool
      */
     public function fileExists(): bool
@@ -387,7 +419,6 @@ class Media extends Model
     }
 
     /**
-     *
      * @return bool
      */
     public function isVisible(): bool
@@ -407,6 +438,7 @@ class Media extends Model
 
     /**
      * Retrieve the contents of the file.
+     *
      * @return string
      */
     public function contents(): string
@@ -415,17 +447,20 @@ class Media extends Model
     }
 
     /**
-     * Get a read stream to the file
+     * Get a read stream to the file.
+     *
      * @return StreamInterface
      */
     public function stream(): StreamInterface
     {
         $stream = $this->storage()->readStream($this->getDiskPath());
+
         return Utils::streamFor($stream);
     }
 
     /**
-     * Verify if the Media is an original file and not a variant
+     * Verify if the Media is an original file and not a variant.
+     *
      * @return bool
      */
     public function isOriginal(): bool
@@ -434,8 +469,10 @@ class Media extends Model
     }
 
     /**
-     * Verify if the Media is a variant of another
+     * Verify if the Media is a variant of another.
+     *
      * @param string|null $variantName if specified, will check if the model if a specific kind of variant
+     *
      * @return bool
      */
     public function isVariant(?string $variantName = null): bool
@@ -446,7 +483,8 @@ class Media extends Model
 
     /**
      * Convert the model into an original.
-     * Detaches the Media for its previous original and other variants
+     * Detaches the Media for its previous original and other variants.
+     *
      * @return $this
      */
     public function makeOriginal(): self
@@ -463,7 +501,8 @@ class Media extends Model
 
     /**
      * @param int|string|Media $media
-     * @param string $variantName
+     * @param string           $variantName
+     *
      * @return $this
      */
     public function makeVariantOf(int|string|Media $media, string $variantName): self
@@ -484,10 +523,13 @@ class Media extends Model
      * Move the file to a new location on disk.
      *
      * Will invoke the `save()` method on the model after the associated file has been moved to prevent synchronization errors
-     * @param string $destination directory relative to disk root
-     * @param string|null $filename filename. Do not include extension
-     * @return void
+     *
+     * @param string      $destination directory relative to disk root
+     * @param string|null $filename    filename. Do not include extension
+     *
      * @throws MediaMoveException
+     *
+     * @return void
      */
     public function move(string $destination, ?string $filename = null): void
     {
@@ -496,9 +538,13 @@ class Media extends Model
 
     /**
      * Rename the file in place.
+     *
      * @param string $filename
-     * @return void
+     *
      * @throws MediaMoveException
+     *
+     * @return void
+     *
      * @see Media::move()
      */
     public function rename(string $filename): void
@@ -510,10 +556,13 @@ class Media extends Model
      * Copy the file from one Media object to another one.
      *
      * Will invoke the `save()` method on the model after the associated file has been copied to prevent synchronization errors
-     * @param string $destination directory relative to disk root
-     * @param string|null $filename optional filename. Do not include extension
-     * @return Media
+     *
+     * @param string      $destination directory relative to disk root
+     * @param string|null $filename    optional filename. Do not include extension
+     *
      * @throws MediaMoveException
+     *
+     * @return Media
      */
     public function copyTo(string $destination, ?string $filename = null): self
     {
@@ -524,12 +573,15 @@ class Media extends Model
      * Move the file to a new location on another disk.
      *
      * Will invoke the `save()` method on the model after the associated file has been moved to prevent synchronization errors
-     * @param string $disk the disk to move the file to
-     * @param string $destination directory relative to disk root
-     * @param string|null $filename filename. Do not include extension
-     * @param array $options
-     * @return void
+     *
+     * @param string      $disk        the disk to move the file to
+     * @param string      $destination directory relative to disk root
+     * @param string|null $filename    filename. Do not include extension
+     * @param array       $options
+     *
      * @throws MediaMoveException If attempting to change the file extension or a file with the same name already exists at the destination
+     *
+     * @return void
      */
     public function moveToDisk(
         string $disk,
@@ -546,12 +598,14 @@ class Media extends Model
      *
      * This method creates a new Media object as well as duplicates the associated file on the disk.
      *
-     * @param string $disk the disk to copy the file to
-     * @param string $destination directory relative to disk root
-     * @param string|null $filename optional filename. Do not include extension
-     * @param array $options
-     * @return Media
+     * @param string      $disk        the disk to copy the file to
+     * @param string      $destination directory relative to disk root
+     * @param string|null $filename    optional filename. Do not include extension
+     * @param array       $options
+     *
      * @throws MediaMoveException If a file with the same name already exists at the destination or it fails to copy the file
+     *
+     * @return Media
      */
     public function copyToDisk(
         string $disk,
@@ -588,6 +642,7 @@ class Media extends Model
 
     /**
      * Get the filesystem object for this media.
+     *
      * @return Filesystem
      */
     protected function storage(): Filesystem
@@ -597,6 +652,7 @@ class Media extends Model
 
     /**
      * Get a UrlGenerator instance for the media.
+     *
      * @return UrlGeneratorInterface
      */
     protected function getUrlGenerator(): UrlGeneratorInterface
