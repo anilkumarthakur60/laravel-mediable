@@ -480,7 +480,7 @@ class MediaUploader
      * @return $this
      * @throws ImageManipulationException
      */
-    public function applyImageManipulation($imageManipulation): self
+    public function applyImageManipulation(string|ImageManipulation $imageManipulation): self
     {
         if (is_string($imageManipulation)) {
             $imageManipulation = $this->imageManipulator->getVariantDefinition($imageManipulation);

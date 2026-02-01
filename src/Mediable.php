@@ -67,11 +67,11 @@ trait Mediable
     /**
      * Query scope to detect the presence of one or more attached media for a given tag.
      * @param  Builder $q
-     * @param  string|string[] $tags
+     * @param string|string[] $tags
      * @param  bool $matchAll
      * @return void
      */
-    public function scopeWhereHasMedia(Builder $q, $tags = [], bool $matchAll = false): void
+    public function scopeWhereHasMedia(Builder $q, array|string $tags = [], bool $matchAll = false): void
     {
         $tags = (array)$tags;
         if ($matchAll && count($tags) > 1) {
@@ -116,10 +116,10 @@ trait Mediable
      * @return void
      */
     public function scopeWithMedia(
-        Builder $q,
-        $tags = [],
-        bool $matchAll = false,
-        bool $withVariants = false
+        Builder      $q,
+        array|string $tags = [],
+        bool         $matchAll = false,
+        bool         $withVariants = false
     ): void {
         $tags = (array)$tags;
 
@@ -599,8 +599,7 @@ trait Mediable
 
         $empty = array_combine($tags, array_fill(0, count($tags), 0));
 
-        $merged = collect($result)->toArray() + $empty;
-        return $merged;
+        return collect($result)->toArray() + $empty;
     }
 
     /**
@@ -630,10 +629,7 @@ trait Mediable
             $relations = func_get_args();
         }
 
-        if (
-            array_key_exists('media', $relations)
-            || in_array('media', $relations)
-        ) {
+        if (array_key_exists('media', $relations)|| in_array('media', $relations)) {
             $this->mediaDirtyTags = [];
         }
 

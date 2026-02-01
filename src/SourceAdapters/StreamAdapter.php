@@ -204,8 +204,7 @@ class StreamAdapter implements SourceAdapterInterface
             return null;
         }
         $headers = $this->originalSource->getMetadata('wrapper_data');
-        if (
-            !empty($headers)
+        if (!empty($headers)
             && preg_match('/HTTP\/\d+\.\d+\s+(\d+)/i', $headers[0], $matches)
         ) {
             return (int)$matches[1];

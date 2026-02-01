@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Plank\Mediable\Exceptions\ImageManipulationException;
+use Plank\Mediable\Exceptions\MediaUpload\ConfigurationException;
 use Plank\Mediable\ImageManipulator;
 use Plank\Mediable\Media;
 
@@ -32,11 +33,11 @@ class CreateImageVariants implements ShouldQueue
 
     /**
      * CreateImageVariants constructor.
-     * @param Media|Collection<int, Media>|Media[] $models
+     * @param Collection<int, Media>|Media|Media[] $models
      * @param string|string[] $variantNames
      * @throws ImageManipulationException
      */
-    public function __construct($models, $variantNames, bool $forceRecreate = false)
+    public function __construct(Collection|array|Media $models, array|string $variantNames, bool $forceRecreate = false)
     {
         $models = $this->collect($models);
         $variantNames = (array) $variantNames;
@@ -47,6 +48,10 @@ class CreateImageVariants implements ShouldQueue
         $this->forceRecreate = $forceRecreate;
     }
 
+    /**
+     * @throws ImageManipulationException
+     * @throws ConfigurationException
+     */
     public function handle(): void
     {
         foreach ($this->getModels() as $model) {
@@ -69,7 +74,7 @@ class CreateImageVariants implements ShouldQueue
     }
 
     /**
-     * @return Collection|Media[]
+     * @return Collection
      */
     public function getModels(): Collection
     {
@@ -106,10 +111,10 @@ class CreateImageVariants implements ShouldQueue
     }
 
     /**
-     * @param Media|Collection|Media[] $models
+     * @param Collection|Media|Media[] $models
      * @return Collection
      */
-    private function collect($models): Collection
+    private function collect(Collection|array|Media $models): Collection
     {
         if ($models instanceof Media) {
             $models = [$models];

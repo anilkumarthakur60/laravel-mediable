@@ -26,9 +26,9 @@ interface MediableInterface
      * @return void
      */
     public function scopeWhereHasMedia(
-        Builder $q,
-        $tags = [],
-        bool $matchAll = false
+        Builder      $q,
+        array|string $tags = [],
+        bool         $matchAll = false
     ): void;
 
     public function scopeWhereHasMediaMatchAll(Builder $q, array $tags): void;
@@ -41,10 +41,10 @@ interface MediableInterface
      * @return mixed
      */
     public function scopeWithMedia(
-        Builder $q,
-        $tags = [],
-        bool $matchAll = false,
-        bool $withVariants = false
+        Builder      $q,
+        array|string $tags = [],
+        bool         $matchAll = false,
+        bool         $withVariants = false
     );
 
     /**
