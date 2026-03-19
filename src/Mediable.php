@@ -6,10 +6,8 @@ namespace Plank\Mediable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Plank\Mediable\Tests\Mocks\SampleMediable;
-use Plank\Mediable\Tests\Mocks\SampleMediableSoftDelete;
+use Plank\Mediable\MediablePivot;
 
 /**
  * Mediable Trait.
@@ -17,8 +15,8 @@ use Plank\Mediable\Tests\Mocks\SampleMediableSoftDelete;
  * Provides functionality for attaching media to an eloquent model.
  * Whether the model should automatically reload its media relationship after modification.
  *
- * @property MediableCollection $media
- * @property Pivot $pivot
+ * @property MediableCollection<int, Media> $media
+ * @property MediablePivot $pivot
  * @method static Builder<Media> withMedia($tags = [], bool $matchAll = false, bool $withVariants = false)
  * @method static Builder<Media> withMediaAndVariants($tags = [], bool $matchAll = false)
  * @method static Builder<Media> withMediaMatchAll($tags = [], bool $withVariants = false)
@@ -53,7 +51,7 @@ trait Mediable
      */
     public function media(): MorphToMany
     {
-        return $this
+        $relation = $this
             ->morphToMany(
                 config('mediable.model'),
                 'mediable',
@@ -61,8 +59,10 @@ trait Mediable
                 'mediable_id',
                 config('mediable.mediables_table_related_key', 'media_id')
             )
-            ->withPivot('tag', 'order')
-            ->orderBy('order');
+            ->using(MediablePivot::class)
+            ->withPivot('tag', 'order');
+        $relation->orderBy('order');
+        return $relation;
     }
 
     /**
@@ -381,7 +381,7 @@ trait Mediable
      * @param bool $matchAll
      * If false, will return media attached to any of the provided tags
      * If true, will return media attached to all of the provided tags simultaneously
-     * @return Collection
+     * @return Collection<int, Media>
      */
     public function getMedia(array|string $tags, bool $matchAll = false): Collection
     {
@@ -403,7 +403,7 @@ trait Mediable
     /**
      * Retrieve media attached to multiple tags simultaneously.
      * @param string[] $tags
-     * @return Collection
+     * @return Collection<int, Media>
      */
     public function getMediaMatchAll(array $tags): Collection
     {
@@ -647,7 +647,8 @@ trait Mediable
 
     /**
      * {@inheritdoc}
-     * @return MediableCollection
+     * @param array<int, static> $models
+     * @return MediableCollection<int, static>
      */
     public function newCollection(array $models = []): MediableCollection
     {

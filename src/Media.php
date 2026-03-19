@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Plank\Mediable\MediablePivot;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Plank\Mediable\Exceptions\MediaMoveException;
 use Plank\Mediable\Exceptions\MediaUrlException;
@@ -37,8 +38,8 @@ use Psr\Http\Message\StreamInterface;
  * @property string $alt
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property Pivot $pivot
- * @property Collection|Media[] $variants
+ * @property MediablePivot $pivot
+ * @property Collection<int, static> $variants
  * @property Media $originalMedia
  * @method static Builder<Media> inDirectory(string $disk, string $directory, bool $recursive = false)
  * @method static Builder<Media> inOrUnderDirectory(string $disk, string $directory)
@@ -258,7 +259,7 @@ class Media extends Model
      */
     public function scopeInOrUnderDirectory(Builder $builder, string $disk, string $directory): Builder
     {
-        return $builder->inDirectory($disk, $directory, true);
+        return $this->scopeInDirectory($builder, $disk, $directory, true);
     }
 
     /**
@@ -304,7 +305,8 @@ class Media extends Model
 
     public function scopeWhereIsOriginal(Builder $builder): Builder
     {
-        return $builder->whereNull('original_media_id');
+        $builder->whereNull('original_media_id');
+        return $builder;
     }
 
     public function scopeWhereIsVariant(Builder $builder, ?string $variant_name = null): Builder

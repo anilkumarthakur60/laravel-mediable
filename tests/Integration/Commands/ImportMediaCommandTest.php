@@ -2,7 +2,7 @@
 
 namespace Plank\Mediable\Tests\Integration\Commands;
 
-use Illuminate\Contracts\Console\Kernel as Artisan;
+use Illuminate\Foundation\Console\Kernel as Artisan;
 use Illuminate\Filesystem\FilesystemManager;
 use Plank\Mediable\Commands\ImportMediaCommand;
 use Plank\Mediable\Media;

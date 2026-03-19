@@ -403,12 +403,9 @@ class ImageManipulator
         string $outputFormat,
         int $outputQuality
     ) {
-        if (class_exists(StreamCommand::class)) {
+        if (method_exists($image, 'stream')) {
             // Intervention Image  <3.0
-            return $image->stream(
-                $outputFormat,
-                $outputQuality
-            );
+            return $image->{'stream'}($outputFormat, $outputQuality);
         }
 
         $formatted = match ($outputFormat) {

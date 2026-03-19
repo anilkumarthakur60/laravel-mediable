@@ -44,7 +44,7 @@ class ImportMediaCommand extends Command
         'skipped' => 0,
     ];
 
-    public function __construct(FileSystemManager $filesystem, MediaUploader $uploader)
+    public function __construct(FilesystemManager $filesystem, MediaUploader $uploader)
     {
         parent::__construct();
         $this->filesystem = $filesystem;
@@ -102,7 +102,7 @@ class ImportMediaCommand extends Command
     /**
      * Search through the record list for one matching the provided path.
      * @param  string $path
-     * @param  Collection $existingMedia
+     * @param  Collection<int, Media> $existingMedia
      * @return Media|null
      */
     protected function getRecordForFile(string $path, Collection $existingMedia): ?Media

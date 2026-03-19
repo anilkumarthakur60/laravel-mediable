@@ -685,7 +685,7 @@ class MediaTest extends TestCase
 
         $this->assertEquals(
             [$media2->getKey(), $media3->getKey()],
-            Media::whereIsVariant()->orderBy('id')->get()->modelKeys()
+            Media::whereIsVariant()->orderBy('id')->pluck('id')->all()
         );
 
         $this->assertEquals(

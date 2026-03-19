@@ -31,7 +31,7 @@ class MediaUploader
     const ON_DUPLICATE_REPLACE = 'replace';
     const ON_DUPLICATE_REPLACE_WITH_VARIANTS = 'replace_with_variants';
 
-    private FileSystemManager $filesystem;
+    private FilesystemManager $filesystem;
 
     private SourceAdapterFactory $factory;
 
@@ -85,7 +85,7 @@ class MediaUploader
      * @param array|null $config
      */
     public function __construct(
-        FileSystemManager $filesystem,
+        FilesystemManager $filesystem,
         SourceAdapterFactory $factory,
         ImageManipulator $imageManipulator,
         ?array $config = null

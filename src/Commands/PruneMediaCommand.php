@@ -28,7 +28,7 @@ class PruneMediaCommand extends Command
 
     protected FilesystemManager $filesystem;
 
-    public function __construct(FileSystemManager $filesystem)
+    public function __construct(FilesystemManager $filesystem)
     {
         parent::__construct();
         $this->filesystem = $filesystem;
@@ -47,7 +47,6 @@ class PruneMediaCommand extends Command
         $counter = 0;
 
         $records = $this->makeModel()
-            ->newQuery()
             ->inDirectory($disk, $directory, $recursive)
             ->get();
 

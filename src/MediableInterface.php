@@ -137,10 +137,13 @@ interface MediableInterface
     /**
      * @param string|string[] $tags
      * @param bool $matchAll
-     * @return Collection
+     * @return Collection<int, Media>
      */
     public function getMedia(array|string $tags, bool $matchAll = false): Collection;
 
+    /**
+     * @return Collection<int, Media>
+     */
     public function getMediaMatchAll(array $tags): Collection;
 
     /**
