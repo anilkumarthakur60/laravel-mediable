@@ -403,7 +403,7 @@ class ImageManipulator
         string $outputFormat,
         int $outputQuality
     ) {
-        if (method_exists($image, 'stream')) {
+        if (!method_exists($this->imageManager, 'read')) {
             // Intervention Image  <3.0
             return $image->{'stream'}($outputFormat, $outputQuality);
         }
